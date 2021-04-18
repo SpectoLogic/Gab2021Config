@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FeatureManagement;
+using Microsoft.FeatureManagement.FeatureFilters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace appcfgdemo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddFeatureManagement();
+            services.AddFeatureManagement().AddFeatureFilter<PercentageFilter>();
             services.Configure<Settings>(Configuration.GetSection("TestApp:Settings"));
             services.AddControllersWithViews();
             services.AddAzureAppConfiguration(); // For Features in Azure App Configuration
