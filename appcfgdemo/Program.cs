@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
 namespace appcfgdemo
 {
@@ -20,7 +22,17 @@ namespace appcfgdemo
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
+                    {
+                        var settings = config.Build();
+                        var connection = settings.GetConnectionString("AppConfig");
+                        config.AddAzureAppConfiguration(options =>
+                            options
+                                .Connect(connection)
+                                .Select(KeyFilter.Any, LabelFilter.Null)
+                                .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                        );
+                    }).UseStartup<Startup>();
                 });
     }
 }
