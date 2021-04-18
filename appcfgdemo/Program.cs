@@ -1,7 +1,9 @@
+using appcfgdemo.Services;
 using Azure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 
@@ -11,7 +13,9 @@ namespace appcfgdemo
     {
         public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var builder =
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -60,6 +64,11 @@ namespace appcfgdemo
                         }
 
                     }).UseStartup<Startup>();
-                });
+                })
+                .ConfigureServices(services => 
+                    services.AddHostedService<ConfigurationUpdateService>());
+
+            return builder;
+        }
     }
 }

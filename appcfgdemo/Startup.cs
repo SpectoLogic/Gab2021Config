@@ -1,4 +1,5 @@
 using appcfgdemo.Models;
+using appcfgdemo.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,6 +28,8 @@ namespace appcfgdemo
             services.Configure<Settings>(Configuration.GetSection("TestApp:Settings"));
             services.AddControllersWithViews();
             services.AddAzureAppConfiguration();
+
+            services.AddSingleton<IConfigurationUpdater, ConfigurationUpdater>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
