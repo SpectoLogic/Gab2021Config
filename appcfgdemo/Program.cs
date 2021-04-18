@@ -36,11 +36,14 @@ namespace appcfgdemo
                             config.AddAzureAppConfiguration(options =>
                                 options
                                     .Connect(new Uri(appConfigUrl), credentials)
+                                    .ConfigureKeyVault(kv =>
+                                    {
+                                        kv.SetCredential(credentials);
+                                    })
                                     .Select(KeyFilter.Any, LabelFilter.Null)
                                     .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
                             );
                         }
-
 
                     }).UseStartup<Startup>();
                 });
