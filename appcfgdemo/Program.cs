@@ -15,6 +15,8 @@ namespace appcfgdemo
 
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
+            IConfigurationRefresher _refresher = null;
+
             var builder =
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -27,17 +29,20 @@ namespace appcfgdemo
                         {
                             string connection = settings.GetConnectionString("AppConfig");
                             config.AddAzureAppConfiguration(options =>
+                            {
                                 options
                                     .Connect(connection)
                                     .ConfigureRefresh(refresh =>
                                     {
                                         refresh.Register("TestApp:Settings:Sentinel",
                                                          true)
-                                        .SetCacheExpiration(TimeSpan.FromSeconds(30));
+                                        .SetCacheExpiration(TimeSpan.FromDays(30)); // Reduce the poll frequency!
                                     }
                                     )
                                     .Select(KeyFilter.Any, LabelFilter.Null)
-                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
+                                _refresher = options.GetRefresher();
+                            }
                             );
                         }
                         else
@@ -45,6 +50,7 @@ namespace appcfgdemo
                             ManagedIdentityCredential credentials = new ManagedIdentityCredential();
                             string appConfigUrl = settings.GetConnectionString("AppConfigUrl");
                             config.AddAzureAppConfiguration(options =>
+                            {
                                 options
                                     .Connect(new Uri(appConfigUrl), credentials)
                                     .ConfigureKeyVault(kv =>
@@ -55,18 +61,21 @@ namespace appcfgdemo
                                     {
                                         refresh.Register("TestApp:Settings:Sentinel",
                                                          true)
-                                        .SetCacheExpiration(TimeSpan.FromSeconds(30));
+                                        .SetCacheExpiration(TimeSpan.FromDays(30)); // Reduce the poll frequency!
                                     }
                                     )
                                     .Select(KeyFilter.Any, LabelFilter.Null)
-                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
+                                _refresher = options.GetRefresher();
+                            }
                             );
                         }
 
                     }).UseStartup<Startup>();
                 })
                 .ConfigureServices(services => 
-                    services.AddHostedService<ConfigurationUpdateService>());
+                    services.AddHostedService<ConfigurationUpdateService>()
+                    .AddSingleton<IConfigurationRefresher>(_refresher));
 
             return builder;
         }
