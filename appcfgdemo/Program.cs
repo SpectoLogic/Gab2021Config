@@ -40,7 +40,11 @@ namespace appcfgdemo
                                     }
                                     )
                                     .Select(KeyFilter.Any, LabelFilter.Null)
-                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
+                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                                    .UseFeatureFlags(featureFlagOptions =>
+                                    {
+                                        featureFlagOptions.CacheExpirationInterval = TimeSpan.FromMinutes(5);
+                                    });
                                 _refresher = options.GetRefresher();
                             }
                             );
@@ -65,7 +69,11 @@ namespace appcfgdemo
                                     }
                                     )
                                     .Select(KeyFilter.Any, LabelFilter.Null)
-                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName);
+                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                                    .UseFeatureFlags(featureFlagOptions =>
+                                    {
+                                        featureFlagOptions.CacheExpirationInterval = TimeSpan.FromMinutes(5);
+                                    });
                                 _refresher = options.GetRefresher();
                             }
                             );
