@@ -25,6 +25,13 @@ namespace appcfgdemo
                             config.AddAzureAppConfiguration(options =>
                                 options
                                     .Connect(connection)
+                                    .ConfigureRefresh(refresh =>
+                                    {
+                                        refresh.Register("TestApp:Settings:Sentinel",
+                                                         true)
+                                        .SetCacheExpiration(TimeSpan.FromSeconds(30));
+                                    }
+                                    )
                                     .Select(KeyFilter.Any, LabelFilter.Null)
                                     .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
                             );
@@ -40,6 +47,13 @@ namespace appcfgdemo
                                     {
                                         kv.SetCredential(credentials);
                                     })
+                                    .ConfigureRefresh(refresh =>
+                                    {
+                                        refresh.Register("TestApp:Settings:Sentinel",
+                                                         true)
+                                        .SetCacheExpiration(TimeSpan.FromSeconds(30));
+                                    }
+                                    )
                                     .Select(KeyFilter.Any, LabelFilter.Null)
                                     .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
                             );

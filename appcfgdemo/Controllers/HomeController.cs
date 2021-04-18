@@ -1,6 +1,7 @@
 ﻿using appcfgdemo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +14,8 @@ namespace appcfgdemo.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,
+                              IOptionsSnapshot<Settings> settings)
         {
             _logger = logger;
         }
