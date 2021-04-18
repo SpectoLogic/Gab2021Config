@@ -1,22 +1,15 @@
+using Azure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
+using Microsoft.Extensions.Hosting;
+using System;
 
 namespace appcfgdemo
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+        public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -24,14 +17,31 @@ namespace appcfgdemo
                 {
                     webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
                     {
-                        var settings = config.Build();
-                        var connection = settings.GetConnectionString("AppConfig");
-                        config.AddAzureAppConfiguration(options =>
-                            options
-                                .Connect(connection)
-                                .Select(KeyFilter.Any, LabelFilter.Null)
-                                .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
-                        );
+                        IConfigurationRoot settings = config.Build();
+
+                        if (hostingContext.HostingEnvironment.IsDevelopment())
+                        {
+                            string connection = settings.GetConnectionString("AppConfig");
+                            config.AddAzureAppConfiguration(options =>
+                                options
+                                    .Connect(connection)
+                                    .Select(KeyFilter.Any, LabelFilter.Null)
+                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                            );
+                        }
+                        else
+                        {
+                            ManagedIdentityCredential credentials = new ManagedIdentityCredential();
+                            string appConfigUrl = settings.GetConnectionString("AppConfigUrl");
+                            config.AddAzureAppConfiguration(options =>
+                                options
+                                    .Connect(new Uri(appConfigUrl), credentials)
+                                    .Select(KeyFilter.Any, LabelFilter.Null)
+                                    .Select(KeyFilter.Any, hostingContext.HostingEnvironment.EnvironmentName)
+                            );
+                        }
+
+
                     }).UseStartup<Startup>();
                 });
     }
